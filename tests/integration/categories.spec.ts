@@ -1,18 +1,14 @@
 import { createCategory } from "@tests/factories";
 import { clearTables } from "@tests/database";
+
 import app from "@src/app";
 import request from "supertest";
 
 describe("Categories", () => {
   describe("GET /categories", () => {
-    beforeAll(async () => {
-      await clearTables();
+    beforeEach(async () => {
       await createCategory({ name: "Jogos" });
       await createCategory({ name: "Hardware" });
-    });
-
-    afterAll(async () => {
-      await clearTables();
     });
 
     it("returns a list of categories in JSON format", async () => {
@@ -22,6 +18,10 @@ describe("Categories", () => {
 
       expect(category1.name).toBe("Jogos");
       expect(category2.name).toBe("Hardware");
+    });
+
+    afterEach(async () => {
+      await clearTables();
     });
   });
 });

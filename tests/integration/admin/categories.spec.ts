@@ -1,24 +1,41 @@
+import categoryService from "@src/services/categoryService";
+import { createCategory } from "@tests/factories";
 import { clearTables } from "@tests/database";
+
 import app from "@src/app";
 import request from "supertest";
-import { find } from "@src/services/categoryService";
 
-describe.skip("Categories", () => {
-  describe("GET /categories", () => {
+describe.skip("Admin: categories", () => {
+  describe("GET /admin/categories", () => {
     afterAll(async () => {
       await clearTables();
     });
 
-    it.skip("create a categories", async () => {
+    it("creates a category", async () => {
       const user = request(app);
-      const res = await user
+      await user
         .post("/admin/categories")
-        .send({ name: "Qualquer" })
-        .expect(404);
+        .send({ name: "Qualquer Coisa" })
+        .expect(200);
 
-      const [category] = await find();
+      const [category] = await categoryService.find();
 
-      expect(category.name).toBe("Qualquer");
+      expect(category.name).toBe("Qualquer Coisa");
+    });
+
+    it("does not create a category with duplicated name", async () => {
+      const user = request(app);
+
+      await createCategory({ name: "Qualquer Coisa" });
+
+      await user
+        .post("/admin/categories")
+        .send({ name: "Qualquer Coisa" })
+        .expect(400);
+
+      const categories = await categoryService.find();
+
+      expect(categories.length).toBe(1);
     });
   });
 });

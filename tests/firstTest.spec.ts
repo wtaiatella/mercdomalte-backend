@@ -1,6 +1,6 @@
-describe("First test", () => {
-  describe("when x = 1 and y = 2", () => {
-    it("returns3", () => {
+describe("First Test", () => {
+  describe("when X = 1 and Y = 2", () => {
+    it("returns 3", () => {
       const x = 1;
       const y = 2;
 
