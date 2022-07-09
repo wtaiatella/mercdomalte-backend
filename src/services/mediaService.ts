@@ -1,13 +1,13 @@
-import { database } from '@src/adapters/database';
+import { database } from "@src/adapters/database";
 
 export const findMedias = async () => {
-	const medias = await database.media.findMany({
-		include: {
-			category: true,
-		},
-	});
+  const medias = await database.media.findMany({
+    include: {
+      category: true,
+    },
+  });
 
-	return medias;
+  return medias;
 };
 
 export default { findMedias };
