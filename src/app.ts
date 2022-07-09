@@ -5,7 +5,6 @@ import { Request, Response } from 'express';
 
 import logger from './adapters/logger';
 
-import { find } from '@src/services/categoryService';
 import categoryService from '@src/services/categoryService';
 import productService from '@src/services/productService';
 import mediaService from '@src/services/mediaService';
@@ -13,7 +12,6 @@ import mediaService from '@src/services/mediaService';
 import NodeMailer from 'nodemailer';
 import { google } from 'googleapis';
 
-console.log(process.env.AWARI);
 const app = express();
 
 app.get('/sendemail', async (req: Request, res: Response) => {
@@ -64,9 +62,9 @@ app.get('/medias', async (req: Request, res: Response) => {
 	res.json(medias);
 });
 
-app.get('/categories', async (req: Request, res: Response) => {
-	const categories = await find();
-	logger.info(`aqui estão as categorias: ${categories}`);
+app.get('/categories', async (_req: Request, res: Response) => {
+	const categories = await categoryService.find();
+
 	res.json(categories);
 });
 
@@ -80,19 +78,28 @@ app.get('/categories/:id', async (req: Request, res: Response) => {
 
 app.get('/categories/:id/products', async (req: Request, res: Response) => {
 	const categoryId = req.params.id;
+
 	logger.debug(`categoryId = ${categoryId}`);
+
 	const products = await productService.find(categoryId);
+
 	res.json(products);
 });
 
 app.get('/products/:id', async (req: Request, res: Response) => {
 	const productId = req.params.id;
+
 	logger.info({ productId });
 
 	const product = await productService.findOne(productId);
+
 	logger.info({ product });
 
 	res.json(product);
+});
+
+app.post('/admin/categories', async (_req: Request, res: Response) => {
+	res.json({});
 });
 
 export default app;
