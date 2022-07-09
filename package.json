@@ -1,0 +1,45 @@
+{
+	"name": "api-ecommerce",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"engines": {
+		"node": "18.4.0"
+	},
+	"scripts": {
+		"test": "DATABASE_URL=postgresql://ecommerce:ecommerce@localhost:5432/ecommerce_test?schema=public jest --runInBand",
+		"test:migrate": "DATABASE_URL=postgresql://ecommerce:ecommerce@localhost:5432/ecommerce_test?schema=public prisma migrate dev",
+		"prettier": "prettier --write './**/*.ts'",
+		"start": "ts-node -r tsconfig-paths/register server.ts",
+		"ci:test": "jest --runInBand",
+		"ci:migrate": "prisma migrate dev",
+		"build": "ts-node -r tsconfig-paths/register server.ts"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"@types/express": "^4.17.13",
+		"@types/gapi": "^0.0.42",
+		"@types/jest": "^28.1.1",
+		"@types/node": "^17.0.40",
+		"@types/nodemailer": "^6.4.4",
+		"@types/supertest": "^2.0.12",
+		"jest": "^28.1.0",
+		"prettier": "^2.6.2",
+		"prisma": "^4.0.0",
+		"supertest": "^6.2.3",
+		"ts-jest": "^28.0.4",
+		"ts-node": "^10.8.1",
+		"typescritp": "^1.0.0"
+	},
+	"dependencies": {
+		"@prisma/client": "^4.0.0",
+		"dotenv": "^16.0.1",
+		"express": "^4.18.1",
+		"googleapis": "^104.0.0",
+		"nodemailer": "^6.7.5",
+		"pino": "^8.1.0",
+		"tsconfig-paths": "^4.0.0"
+	}
+}
