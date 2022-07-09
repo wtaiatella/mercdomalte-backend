@@ -20,7 +20,7 @@ const findOne = async (productId: string) => {
 
 	const product = await database.product.findUnique({
 		where: {
-			id: productId,
+			slug: productId,
 		},
 	});
 
