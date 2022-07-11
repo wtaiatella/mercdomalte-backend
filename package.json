@@ -10,7 +10,8 @@
 		"test": "DATABASE_URL=postgresql://ecommerce:ecommerce@localhost:5432/ecommerce_test?schema=public jest --runInBand",
 		"test:migrate": "DATABASE_URL=postgresql://ecommerce:ecommerce@localhost:5432/ecommerce_test?schema=public prisma migrate dev",
 		"prettier": "prettier --write './**/*.ts'",
-		"start": "ts-node -r tsconfig-paths/register server.ts",
+		"start": "babel-node -x .ts -- server.ts",
+		"start-old": "ts-node -r tsconfig-paths/register server.ts",
 		"ci:test": "jest --runInBand",
 		"ci:migrate": "prisma migrate dev"
 	},
@@ -21,6 +22,13 @@
 		"seed": "ts-node prisma/seed.ts"
 	},
 	"devDependencies": {
+		"@babel/core": "^7.18.6",
+		"@babel/node": "^7.18.6",
+		"@babel/plugin-proposal-class-properties": "^7.18.6",
+		"@babel/plugin-transform-runtime": "^7.18.6",
+		"@babel/preset-env": "^7.18.6",
+		"@babel/preset-typescript": "^7.18.6",
+		"@types/babel__core": "^7.1.19",
 		"@types/jest": "^28.1.1",
 		"@types/supertest": "^2.0.12",
 		"jest": "^28.1.0",
@@ -30,6 +38,7 @@
 		"ts-jest": "^28.0.4"
 	},
 	"dependencies": {
+		"@babel/runtime": "^7.18.6",
 		"@prisma/client": "^4.0.0",
 		"@types/express": "^4.17.13",
 		"@types/gapi": "^0.0.42",
