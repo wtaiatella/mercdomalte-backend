@@ -8,51 +8,24 @@ import logger from './adapters/logger';
 import categoryService from './services/categoryService';
 import productService from './services/productService';
 import mediaService from './services/mediaService';
-
-import NodeMailer from 'nodemailer';
-import { google } from 'googleapis';
+import { sendEmail } from './services/emailService';
+import { s3getSignedUrl } from './services/awsService';
 
 const app = express();
 
+app.get('/uploadurl', async (req: Request, res: Response) => {
+	//const response = await fetch(signedUrl, {method: 'PUT', body: bucketParams.Body});
+
+	const response = await s3getSignedUrl();
+	console.log(`\nResponse returned by signed URL: ${response}\n`);
+
+	res.json(response);
+});
+
 app.get('/sendemail', async (req: Request, res: Response) => {
-	const OAuth2 = google.auth.OAuth2;
-
-	const oauth2Client = new OAuth2(
-		process.env.CLIENT_ID,
-		process.env.CLIENT_SECRET,
-		'https://developers.google.com/oauthplayground' // Redirect URL
-	);
-
-	oauth2Client.setCredentials({
-		refresh_token: process.env.REFRESH_TOKEN,
-	});
-	const accessToken = await oauth2Client.getAccessToken();
-
-	let transporter = NodeMailer.createTransport({
-		host: 'smtp.gmail.com',
-		port: 465,
-		secure: true,
-		auth: {
-			type: 'OAuth2',
-			user: 'wtaiatella@gmail.com',
-			clientId: process.env.CLIENT_ID,
-			clientSecret: process.env.CLIENT_SECRET,
-			refreshToken: process.env.REFRESH_TOKEN,
-			accessToken: accessToken.token ? accessToken.token : '',
-		},
-	});
-
-	const mailOptions = {
-		from: 'wtaiatella@gmail.com',
-		to: 'mercdomalte@gmail.com',
-		subject: 'Message1',
-		text: 'I hope this message gets through!',
-	};
-
-	transporter.sendMail(mailOptions, (error, response) => {
-		error ? console.log(error) : console.log(response);
-		transporter.close();
-	});
+	const emailTo = 'asdf@asd.com';
+	const respEmail = sendEmail(emailTo);
+	res.json(respEmail);
 });
 
 app.get('/medias', async (req: Request, res: Response) => {
