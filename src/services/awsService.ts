@@ -1,3 +1,5 @@
+import { GetObjectCommand } from '@aws-sdk/client-s3';
+
 const { CognitoIdentityClient } = require('@aws-sdk/client-cognito-identity');
 const {
 	fromCognitoIdentityPool,
@@ -7,10 +9,10 @@ const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 
-export const s3getSignedUrl = async () => {
-	const REGION = process.env.REGION;
-	const IDENTITY_POOL_ID = process.env.IDENTITY_POOL_ID;
-	const BUCKET_NAME = process.env.BUCKET_NAME;
+export const s3getUploadSignedUrl = async (fileName: any) => {
+	const REGION = process.env.AWS_REGION;
+	const IDENTITY_POOL_ID = process.env.AWS_IDENTITY_POOL_ID;
+	const BUCKET_NAME = process.env.AWS_BUCKET_NAME;
 
 	const s3 = new S3Client({
 		region: REGION,
@@ -22,21 +24,51 @@ export const s3getSignedUrl = async () => {
 
 	const bucketParams = {
 		Bucket: BUCKET_NAME,
-		Key: 'Presigned key',
-		Body: 'file',
+		Key: fileName,
 	};
 
 	// Create a presigned URL.
 	try {
-		// Create a command to put the object in the S3 bucket.
 		const command = new PutObjectCommand(bucketParams);
-		// Create the presigned URL.
+		//const signedUrl = await getSignedUrl(s3, 'getObject', bucketParams);
 		const signedUrl = await getSignedUrl(s3, command, {
 			expiresIn: 3600,
 		});
-		console.log(
-			`\nPutting "${bucketParams.Key}" using signedUrl with body "${bucketParams.Body}" in v3`
-		);
+		console.log(`\nCreating URL valid for 3600 seconds`);
+		console.log(signedUrl);
+		return signedUrl;
+	} catch (err: any) {
+		console.log('Error creating presigned URL', err);
+		return err.message;
+	}
+};
+
+export const s3getDownloadSignedUrl = async (fileName: any) => {
+	const REGION = process.env.AWS_REGION;
+	const IDENTITY_POOL_ID = process.env.AWS_IDENTITY_POOL_ID;
+	const BUCKET_NAME = process.env.AWS_BUCKET_NAME;
+
+	const s3 = new S3Client({
+		region: REGION,
+		credentials: fromCognitoIdentityPool({
+			client: new CognitoIdentityClient({ region: REGION }),
+			identityPoolId: IDENTITY_POOL_ID,
+		}),
+	});
+
+	const bucketParams = {
+		Bucket: BUCKET_NAME,
+		Key: fileName,
+	};
+
+	// Create a presigned URL.
+	try {
+		const command = new GetObjectCommand(bucketParams);
+		//const signedUrl = await getSignedUrl(s3, 'getObject', bucketParams);
+		const signedUrl = await getSignedUrl(s3, command, {
+			expiresIn: 3600,
+		});
+		console.log(`\nCreating URL valid for 3600 seconds`);
 		console.log(signedUrl);
 		return signedUrl;
 	} catch (err: any) {

@@ -9,17 +9,45 @@ import categoryService from './services/categoryService';
 import productService from './services/productService';
 import mediaService from './services/mediaService';
 import { sendEmail } from './services/emailService';
-import { s3getSignedUrl } from './services/awsService';
+import {
+	s3getUploadSignedUrl,
+	s3getDownloadSignedUrl,
+} from './services/awsService';
+
+const cors = require('cors');
 
 const app = express();
 
-app.get('/uploadurl', async (req: Request, res: Response) => {
-	//const response = await fetch(signedUrl, {method: 'PUT', body: bucketParams.Body});
+var corsOptions = {
+	origin: '*',
+	optionsSuccessStatus: 200, // For legacy browser support
+};
 
-	const response = await s3getSignedUrl();
+app.use(cors(corsOptions));
+app.use(express.json());
+
+app.post('/uploadurl', cors(), async (req: Request, res: Response) => {
+	const { fileName } = req.body;
+
+	console.log(req.body);
+	console.log(fileName);
+	const response = await s3getUploadSignedUrl(fileName);
 	console.log(`\nResponse returned by signed URL: ${response}\n`);
 
 	res.json(response);
+	//res.json(fileName);
+});
+
+app.post('/downloadurl', cors(), async (req: Request, res: Response) => {
+	const { fileName } = req.body;
+
+	console.log(req.body);
+	console.log(fileName);
+	const response = await s3getUploadSignedUrl(fileName);
+	console.log(`\nResponse returned by signed URL: ${response}\n`);
+
+	res.json(response);
+	//res.json(fileName);
 });
 
 app.get('/sendemail', async (req: Request, res: Response) => {
@@ -33,6 +61,45 @@ app.get('/medias', async (req: Request, res: Response) => {
 	console.log(`aqui estão as Medias:`);
 	console.log(medias);
 	res.json(medias);
+});
+
+interface mediaProps {
+	title: string;
+	name: string;
+	slug: string;
+	icon: string;
+	type: string;
+	size: number;
+	categoryId: string;
+}
+
+app.post('/medias', async (req: Request, res: Response) => {
+	console.log(req.body);
+	const { title, name, slug, icon, type, size, categoryId } = req.body;
+	const media: mediaProps = {
+		title,
+		name,
+		slug,
+		icon,
+		type,
+		size,
+		categoryId,
+	};
+
+	try {
+		const category = await mediaService.create(media);
+		res.json({ title });
+	} catch (err) {
+		res.status(400);
+		//res.json({ err: 'Invalid name' });
+	}
+});
+
+app.get('/mediascategories', async (req: Request, res: Response) => {
+	const categories = await mediaService.findCategories();
+	console.log(`aqui estão as Medias:`);
+	console.log(categories);
+	res.json(categories);
 });
 
 app.get('/categories', async (_req: Request, res: Response) => {

@@ -1,11 +1,11 @@
 version: '3'
 
 services:
-    postgres:
+    mdm-postgres:
         image: postgres:14
         environment:
             POSTGRES_PASSWORD: ecommerce
             POSTGRES_USER: ecommerce
             POSTGRES_DB: ecommerce
         ports:
-            - 5432:5432
+            - 5435:5432
