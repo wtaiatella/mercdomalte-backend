@@ -1,19 +1,19 @@
-import { database } from './../adapters/database';
+import { database } from "./../adapters/database";
 
 export const find = async () => {
-	const categories = await database.category.findMany();
+  const categories = await database.category.findMany();
 
-	return categories;
+  return categories;
 };
 
 const findOne = async (categoryId: string) => {
-	const category = await database.category.findUnique({
-		where: {
-			id: categoryId,
-		},
-	});
+  const category = await database.category.findUnique({
+    where: {
+      id: categoryId,
+    },
+  });
 
-	return category;
+  return category;
 };
 
 export default { find, findOne };

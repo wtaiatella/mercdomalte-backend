@@ -1,105 +1,145 @@
-import 'dotenv/config';
+import "dotenv/config";
 
-import express from 'express';
-import { Request, Response } from 'express';
+import express from "express";
+import { Request, Response } from "express";
 
-import logger from './adapters/logger';
+import logger from "./adapters/logger";
 
-import categoryService from './services/categoryService';
-import productService from './services/productService';
-import mediaService from './services/mediaService';
+import categoryService from "./services/categoryService";
+import productService from "./services/productService";
+import mediaService from "./services/mediaService";
+import { sendEmail } from "./services/emailService";
+import {
+  s3getUploadSignedUrl,
+  s3getDownloadSignedUrl,
+} from "./services/awsService";
 
-import NodeMailer from 'nodemailer';
-import { google } from 'googleapis';
+const cors = require("cors");
 
 const app = express();
 
-app.get('/sendemail', async (req: Request, res: Response) => {
-	const OAuth2 = google.auth.OAuth2;
+var corsOptions = {
+  origin: "*",
+  optionsSuccessStatus: 200, // For legacy browser support
+};
 
-	const oauth2Client = new OAuth2(
-		process.env.CLIENT_ID,
-		process.env.CLIENT_SECRET,
-		'https://developers.google.com/oauthplayground' // Redirect URL
-	);
+app.use(cors(corsOptions));
+app.use(express.json());
 
-	oauth2Client.setCredentials({
-		refresh_token: process.env.REFRESH_TOKEN,
-	});
-	const accessToken = await oauth2Client.getAccessToken();
+app.post("/uploadurl", cors(), async (req: Request, res: Response) => {
+  const { fileName } = req.body;
 
-	let transporter = NodeMailer.createTransport({
-		host: 'smtp.gmail.com',
-		port: 465,
-		secure: true,
-		auth: {
-			type: 'OAuth2',
-			user: 'wtaiatella@gmail.com',
-			clientId: process.env.CLIENT_ID,
-			clientSecret: process.env.CLIENT_SECRET,
-			refreshToken: process.env.REFRESH_TOKEN,
-			accessToken: accessToken.token ? accessToken.token : '',
-		},
-	});
+  console.log(req.body);
+  console.log(fileName);
+  const response = await s3getUploadSignedUrl(fileName);
+  console.log(`\nResponse returned by signed URL: ${response}\n`);
 
-	const mailOptions = {
-		from: 'wtaiatella@gmail.com',
-		to: 'mercdomalte@gmail.com',
-		subject: 'Message1',
-		text: 'I hope this message gets through!',
-	};
-
-	transporter.sendMail(mailOptions, (error, response) => {
-		error ? console.log(error) : console.log(response);
-		transporter.close();
-	});
+  res.json(response);
+  //res.json(fileName);
 });
 
-app.get('/medias', async (req: Request, res: Response) => {
-	const medias = await mediaService.findMedias();
-	console.log(`aqui estão as Medias:`);
-	console.log(medias);
-	res.json(medias);
+app.post("/downloadurl", cors(), async (req: Request, res: Response) => {
+  const { fileName } = req.body;
+
+  console.log(req.body);
+  console.log(fileName);
+  const response = await s3getUploadSignedUrl(fileName);
+  console.log(`\nResponse returned by signed URL: ${response}\n`);
+
+  res.json(response);
+  //res.json(fileName);
 });
 
-app.get('/categories', async (_req: Request, res: Response) => {
-	const categories = await categoryService.find();
-
-	res.json(categories);
+app.get("/sendemail", async (req: Request, res: Response) => {
+  const emailTo = "asdf@asd.com";
+  const respEmail = sendEmail(emailTo);
+  res.json(respEmail);
 });
 
-app.get('/categories/:id', async (req: Request, res: Response) => {
-	const categoryId = req.params.id;
-
-	const category = await categoryService.findOne(categoryId);
-
-	res.json(category);
+app.get("/medias", async (req: Request, res: Response) => {
+  const medias = await mediaService.findMedias();
+  console.log(`aqui estão as Medias:`);
+  console.log(medias);
+  res.json(medias);
 });
 
-app.get('/categories/:id/products', async (req: Request, res: Response) => {
-	const categoryId = req.params.id;
+interface mediaProps {
+  title: string;
+  name: string;
+  slug: string;
+  icon: string;
+  type: string;
+  size: number;
+  categoryId: string;
+}
 
-	logger.debug(`categoryId = ${categoryId}`);
+app.post("/medias", async (req: Request, res: Response) => {
+  console.log(req.body);
+  const { title, name, slug, icon, type, size, categoryId } = req.body;
+  const media: mediaProps = {
+    title,
+    name,
+    slug,
+    icon,
+    type,
+    size,
+    categoryId,
+  };
 
-	const products = await productService.find(categoryId);
-
-	res.json(products);
+  try {
+    const category = await mediaService.create(media);
+    res.json({ title });
+  } catch (err) {
+    res.status(400);
+    //res.json({ err: 'Invalid name' });
+  }
 });
 
-app.get('/products/:id', async (req: Request, res: Response) => {
-	const productId = req.params.id;
-
-	logger.info({ productId });
-
-	const product = await productService.findOne(productId);
-
-	logger.info({ product });
-
-	res.json(product);
+app.get("/mediascategories", async (req: Request, res: Response) => {
+  const categories = await mediaService.findCategories();
+  console.log(`aqui estão as Medias:`);
+  console.log(categories);
+  res.json(categories);
 });
 
-app.post('/admin/categories', async (_req: Request, res: Response) => {
-	res.json({});
+app.get("/categories", async (_req: Request, res: Response) => {
+  const categories = await categoryService.find();
+
+  res.json(categories);
+});
+
+app.get("/categories/:id", async (req: Request, res: Response) => {
+  const categoryId = req.params.id;
+
+  const category = await categoryService.findOne(categoryId);
+
+  res.json(category);
+});
+
+app.get("/categories/:id/products", async (req: Request, res: Response) => {
+  const categoryId = req.params.id;
+
+  logger.debug(`categoryId = ${categoryId}`);
+
+  const products = await productService.find(categoryId);
+
+  res.json(products);
+});
+
+app.get("/products/:id", async (req: Request, res: Response) => {
+  const productId = req.params.id;
+
+  logger.info({ productId });
+
+  const product = await productService.findOne(productId);
+
+  logger.info({ product });
+
+  res.json(product);
+});
+
+app.post("/admin/categories", async (_req: Request, res: Response) => {
+  res.json({});
 });
 
 export default app;

@@ -1,13 +1,45 @@
-import { database } from './../adapters/database';
+import { type } from "os";
+import { validateLocaleAndSetLanguage } from "typescript";
+import { database } from "./../adapters/database";
 
-export const findMedias = async () => {
-	const medias = await database.media.findMany({
-		include: {
-			category: true,
-		},
-	});
+const findMedias = async () => {
+  const medias = await database.media.findMany({
+    include: {
+      category: true,
+    },
+  });
 
-	return medias;
+  return medias;
 };
 
-export default { findMedias };
+const findCategories = async () => {
+  const categories = await database.mediaCategory.findMany({});
+
+  return categories;
+};
+
+interface mediaProps {
+  title: string;
+  name: string;
+  slug: string;
+  icon: string;
+  type: string;
+  size: number;
+  categoryId: string;
+}
+
+const create = async (media: mediaProps) => {
+  return database.media.create({
+    data: {
+      title: media.title,
+      name: media.name,
+      slug: media.slug,
+      icon: media.icon,
+      type: media.type,
+      size: media.size,
+      categoryId: media.categoryId,
+    },
+  });
+};
+
+export default { findMedias, findCategories, create };
