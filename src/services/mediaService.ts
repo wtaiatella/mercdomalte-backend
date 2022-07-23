@@ -18,6 +18,16 @@ const findCategories = async () => {
   return categories;
 };
 
+const findSlug = async (fileSlug: string) => {
+  const file = await database.media.findUnique({
+    where: {
+      slug: fileSlug,
+    },
+  });
+
+  return file;
+};
+
 interface mediaProps {
   title: string;
   name: string;
@@ -42,4 +52,4 @@ const create = async (media: mediaProps) => {
   });
 };
 
-export default { findMedias, findCategories, create };
+export default { findMedias, findCategories, create, findSlug };

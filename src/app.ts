@@ -29,10 +29,10 @@ app.use(express.json());
 app.post("/uploadurl", cors(), async (req: Request, res: Response) => {
   const { fileName } = req.body;
 
-  console.log(req.body);
-  console.log(fileName);
+  logger.debug(req.body);
+  logger.debug(fileName);
   const response = await s3getUploadSignedUrl(fileName);
-  console.log(`\nResponse returned by signed URL: ${response}\n`);
+  logger.debug(`\nResponse returned by signed URL: ${response}\n`);
 
   res.json(response);
   //res.json(fileName);
@@ -41,19 +41,13 @@ app.post("/uploadurl", cors(), async (req: Request, res: Response) => {
 app.post("/downloadurl", cors(), async (req: Request, res: Response) => {
   const { fileName } = req.body;
 
-  console.log(req.body);
-  console.log(fileName);
-  const response = await s3getUploadSignedUrl(fileName);
-  console.log(`\nResponse returned by signed URL: ${response}\n`);
+  logger.debug(req.body);
+  logger.debug(fileName);
+  const url = await s3getDownloadSignedUrl(fileName);
+  logger.debug(`\nResponse returned by signed URL: ${url}\n`);
 
-  res.json(response);
+  res.json(url);
   //res.json(fileName);
-});
-
-app.get("/sendemail", async (req: Request, res: Response) => {
-  const emailTo = "asdf@asd.com";
-  const respEmail = sendEmail(emailTo);
-  res.json(respEmail);
 });
 
 app.get("/medias", async (req: Request, res: Response) => {
@@ -102,6 +96,26 @@ app.get("/mediascategories", async (req: Request, res: Response) => {
   res.json(categories);
 });
 
+//Verify if slug exist
+//medias/slug/${fileSlug}
+app.get("/medias/slug/:slug", async (req: Request, res: Response) => {
+  const fileSlug = req.params.slug;
+  console.log(fileSlug);
+
+  const medias = await mediaService.findSlug(fileSlug);
+  console.log(`aqui estão as Medias:`);
+  console.log(medias);
+  res.json(medias);
+});
+
+app.get("/sendemail", async (req: Request, res: Response) => {
+  const emailTo = "asdf@asd.com";
+  const respEmail = sendEmail(emailTo);
+  res.json(respEmail);
+});
+
+//API de referência das aulas AWARI
+//Retirar e alterar os testes antes de publicar no portifólio
 app.get("/categories", async (_req: Request, res: Response) => {
   const categories = await categoryService.find();
 

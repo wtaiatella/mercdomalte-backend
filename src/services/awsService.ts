@@ -1,29 +1,23 @@
-import { GetObjectCommand } from "@aws-sdk/client-s3";
-
 const { CognitoIdentityClient } = require("@aws-sdk/client-cognito-identity");
 const {
   fromCognitoIdentityPool,
 } = require("@aws-sdk/credential-provider-cognito-identity");
 
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} = require("@aws-sdk/client-s3");
 
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
 export const s3getUploadSignedUrl = async (fileName: any) => {
-  const REGION = process.env.AWS_REGION;
-  const IDENTITY_POOL_ID = process.env.AWS_IDENTITY_POOL_ID;
-  const BUCKET_NAME = process.env.AWS_BUCKET_NAME;
-
   const s3 = new S3Client({
-    region: REGION,
-    credentials: fromCognitoIdentityPool({
-      client: new CognitoIdentityClient({ region: REGION }),
-      identityPoolId: IDENTITY_POOL_ID,
-    }),
+    region: process.env.AWS_REGION,
   });
 
   const bucketParams = {
-    Bucket: BUCKET_NAME,
+    Bucket: process.env.AWS_BUCKET,
     Key: fileName,
   };
 
@@ -44,20 +38,12 @@ export const s3getUploadSignedUrl = async (fileName: any) => {
 };
 
 export const s3getDownloadSignedUrl = async (fileName: any) => {
-  const REGION = process.env.AWS_REGION;
-  const IDENTITY_POOL_ID = process.env.AWS_IDENTITY_POOL_ID;
-  const BUCKET_NAME = process.env.AWS_BUCKET_NAME;
-
   const s3 = new S3Client({
-    region: REGION,
-    credentials: fromCognitoIdentityPool({
-      client: new CognitoIdentityClient({ region: REGION }),
-      identityPoolId: IDENTITY_POOL_ID,
-    }),
+    region: process.env.AWS_REGION,
   });
 
   const bucketParams = {
-    Bucket: BUCKET_NAME,
+    Bucket: process.env.AWS_BUCKET,
     Key: fileName,
   };
 
