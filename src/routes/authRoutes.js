@@ -1,4 +1,4 @@
-import { database } from "./../adapters/database";
+import { database } from "../adapters/database";
 var express = require('express');
 var passport = require('passport');
 var LocalStrategy = require('passport-local');
