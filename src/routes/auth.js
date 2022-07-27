@@ -1,3 +1,4 @@
+import { database } from "./../adapters/database";
 var express = require('express');
 var passport = require('passport');
 var LocalStrategy = require('passport-local');
@@ -7,6 +8,13 @@ var router = express.Router();
 
 passport.use(
 	new LocalStrategy(function verify(username, password, cb) {
+		const product = await database.product.findUnique({
+			where: {
+			  slug: productId,
+			},
+		  });
+		
+		
 		db.get(
 			'SELECT * FROM users WHERE username = ?',
 			[username],
