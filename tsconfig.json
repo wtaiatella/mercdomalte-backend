@@ -6,17 +6,22 @@
 			"@tests/*": ["./tests/*"]
 		},
 
-		"target": "es2016",
-		"lib": ["es6"],
+		"target": "ES6",
+		"lib": ["dom", "es6"],
 		"module": "commonjs",
+		"moduleResolution": "node",
 		"resolveJsonModule": true,
+		"sourceMap": true,
 		"allowJs": true,
 		"outDir": "build",
 		"removeComments": true,
 		"esModuleInterop": true,
+		"importHelpers": true,
 		"forceConsistentCasingInFileNames": true,
 		"strict": true,
 		"noImplicitAny": true,
 		"skipLibCheck": true
-	}
+	},
+	"exclude": ["node_modules", "dist"],
+	"include": ["src"]
 }
