@@ -1,5 +1,3 @@
-import { type } from "os";
-import { validateLocaleAndSetLanguage } from "typescript";
 import { database } from "./../adapters/database";
 
 const findMedias = async () => {

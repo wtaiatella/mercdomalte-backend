@@ -1,4 +1,4 @@
-var express = require('express');
+import express from 'express';
 import { Request, Response } from 'express';
 
 import logger from '../adapters/logger';
@@ -6,7 +6,7 @@ import logger from '../adapters/logger';
 import categoryService from '../services/categoryService';
 import productService from '../services/productService';
 
-var router = express.Router();
+const router = express.Router();
 
 //API de referência das aulas AWARI
 //Retirar e alterar os testes antes de publicar no portifólio
@@ -50,4 +50,4 @@ router.post('/admin/categories', async (_req: Request, res: Response) => {
 	res.json({});
 });
 
-module.exports = router;
+export default router;

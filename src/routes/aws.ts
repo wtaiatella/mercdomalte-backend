@@ -1,11 +1,10 @@
-var express = require('express');
+import express from 'express';
 import { Request, Response } from 'express';
-
 import logger from '../adapters/logger';
 
 import awsService from '../services/awsService';
 
-var router = express.Router();
+const router = express.Router();
 
 router.post('/uploadurl', async (req: Request, res: Response) => {
 	const { fileName } = req.body;
@@ -31,4 +30,4 @@ router.post('/downloadurl', async (req: Request, res: Response) => {
 	//res.json(fileName);
 });
 
-module.exports = router;
+export default router;

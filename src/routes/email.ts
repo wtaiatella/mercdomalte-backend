@@ -1,12 +1,9 @@
-var express = require('express');
+import express from 'express';
 import { Request, Response } from 'express';
 
-import logger from '../adapters/logger';
-
-import mediaService from '../services/mediaService';
 import emailService from '../services/emailService';
 
-var router = express.Router();
+const router = express.Router();
 
 router.get('/sendemail', async (req: Request, res: Response) => {
 	const emailTo = 'asdf@asd.com';
@@ -14,4 +11,4 @@ router.get('/sendemail', async (req: Request, res: Response) => {
 	res.json(respEmail);
 });
 
-module.exports = router;
+export default router;
