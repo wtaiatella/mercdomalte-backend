@@ -18,7 +18,8 @@
 		"test": "DATABASE_URL=postgresql://ecommerce:ecommerce@localhost:5435/ecommerce_test?schema=public jest --runInBand",
 		"test:migrate": "DATABASE_URL=postgresql://ecommerce:ecommerce@localhost:5435/ecommerce_test?schema=public prisma migrate dev",
 		"ci:test": "jest --runInBand",
-		"ci:migrate": "prisma migrate dev"
+		"ci:migrate": "prisma migrate dev",
+		"docker": "docker-compose up mdm-postgres"
 	},
 	"dependencies": {
 		"@aws-sdk/client-cognito-identity": "^3.128.0",
