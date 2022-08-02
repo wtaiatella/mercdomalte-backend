@@ -28,7 +28,7 @@ const register = async (data: dataProps) => {
 	return user;
 };
 
-const login = async (data: dataProps) => {
+const login = async (data: dataProps, newRegister: boolean) => {
 	const { email, password } = data;
 	logger.info('Busca de usuario para login');
 	logger.info(`email: ${data.email}`);
@@ -48,7 +48,10 @@ const login = async (data: dataProps) => {
 		throw new createError.NotFound('Usuário não registrado');
 	}
 
-	const checkPassword = bcrypt.compareSync(password, `${user.password}`);
+	const checkPassword = newRegister
+		? true
+		: bcrypt.compareSync(password, `${user.password}`);
+
 	if (!checkPassword) {
 		logger.info('Senha incorreta');
 		throw new createError.Unauthorized('Senha incorreta');
