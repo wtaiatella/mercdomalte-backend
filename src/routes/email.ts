@@ -6,7 +6,7 @@ import emailService from '../services/emailService';
 const router = express.Router();
 
 router.get('/sendemail', async (req: Request, res: Response) => {
-	const emailTo = 'asdf@asd.com';
+	const emailTo = 'wtaiatella@yahoo.com.br';
 	const respEmail = emailService.send(emailTo);
 	res.json(respEmail);
 });
