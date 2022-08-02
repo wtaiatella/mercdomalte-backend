@@ -1,17 +1,13 @@
-const { CognitoIdentityClient } = require("@aws-sdk/client-cognito-identity");
-const {
-  fromCognitoIdentityPool,
-} = require("@aws-sdk/credential-provider-cognito-identity");
-
-const {
+import { CognitoIdentityClient } from "@aws-sdk/client-cognito-identity";
+import { fromCognitoIdentityPool } from "@aws-sdk/credential-provider-cognito-identity";
+import {
   S3Client,
   PutObjectCommand,
   GetObjectCommand,
-} = require("@aws-sdk/client-s3");
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
-
-export const s3getUploadSignedUrl = async (fileName: any) => {
+const getUploadSignedUrl = async (fileName: string) => {
   const s3 = new S3Client({
     region: process.env.AWS_REGION,
   });
@@ -31,13 +27,14 @@ export const s3getUploadSignedUrl = async (fileName: any) => {
     console.log(`\nCreating URL valid for 3600 seconds`);
     console.log(signedUrl);
     return signedUrl;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     console.log("Error creating presigned URL", err);
     return err.message;
   }
 };
 
-export const s3getDownloadSignedUrl = async (fileName: any) => {
+const getDownloadSignedUrl = async (fileName: string) => {
   const s3 = new S3Client({
     region: process.env.AWS_REGION,
   });
@@ -57,13 +54,14 @@ export const s3getDownloadSignedUrl = async (fileName: any) => {
     console.log(`\nCreating URL valid for 3600 seconds`);
     console.log(signedUrl);
     return signedUrl;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     console.log("Error creating presigned URL", err);
     return err.message;
   }
 };
 
-export const s3upload = async (file: any) => {
+const s3upload = async (file: File) => {
   const REGION = "us-east-1";
   const IDENTITY_POOL_ID = "us-east-1:296f99e0-15e9-43b8-b779-0691cb87c545";
   const BUCKET_NAME = "mercdomalte-files";
@@ -78,7 +76,6 @@ export const s3upload = async (file: any) => {
 
   console.log("credenciais iniciais");
   console.log(`IDENTITY_POOL_ID = ${IDENTITY_POOL_ID}`);
-  console.log(s3.credentials);
   console.log(s3);
 
   console.log("Função s3upload");
@@ -93,10 +90,12 @@ export const s3upload = async (file: any) => {
     Body: file,
   };
   try {
-    const data = await s3.send(new PutObjectCommand(uploadParams));
+    await s3.send(new PutObjectCommand(uploadParams));
     //alert('Successfully uploaded photo.');
   } catch (err) {
     return err;
     //alert('There was an error uploading your photo: ' + err.message);
   }
 };
+
+export default { getUploadSignedUrl, getDownloadSignedUrl, s3upload };
