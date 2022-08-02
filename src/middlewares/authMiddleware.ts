@@ -2,6 +2,7 @@ import jwt from '../utils/jwt';
 import createError from 'http-errors';
 import { NextFunction, Request, RequestHandler, Response } from 'express';
 import logger from '../adapters/logger';
+import authService from '@src/services/authService';
 
 const authGuard: RequestHandler = async (
 	req: Request,
@@ -55,4 +56,30 @@ const authGuard: RequestHandler = async (
 	}
 };
 
-export default { authGuard };
+const authLogin: RequestHandler = async (req: Request, res: Response) => {
+	logger.info('Login após registro');
+	try {
+		const newRegister = true;
+		const data = await authService.login(req.body, newRegister);
+		res.status(200).json({
+			status: true,
+			message: 'Login com sucessos',
+			data,
+			code: 200,
+		});
+		logger.info('Login com sucesso');
+		logger.info(data);
+
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	} catch (e: any) {
+		logger.info('Erro de Login');
+		logger.info(e);
+		res.status(e.statusCode).json({
+			status: false,
+			message: e.message,
+			code: e.statusCode,
+		});
+	}
+};
+
+export default { authGuard, authLogin };

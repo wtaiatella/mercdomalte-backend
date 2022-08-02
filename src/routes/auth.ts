@@ -9,34 +9,38 @@ import authMiddleware from '../middlewares/authMiddleware';
 const router = express.Router();
 
 // register
-router.post('/register', async (req, res) => {
-	logger.info(req.body);
-	try {
-		const user = await authService.register(req.body);
-		res.status(200).json({
-			status: true,
-			message: 'Usuário cadastrado com sucesso',
-			data: user,
-		});
-
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	} catch (e: any) {
-		logger.info('Erro no cadastro de usuário');
-		res.status(400).json({
-			status: true,
-			message: 'Usuario já cadastrado',
-		});
-	}
-});
+router.post(
+	'/register',
+	async (req, res, next) => {
+		logger.info(req.body);
+		try {
+			const user = await authService.register(req.body);
+			logger.info('Usuario cadastrado com sucesso');
+			logger.info(user);
+			next();
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		} catch (e: any) {
+			logger.info('Erro no cadastro de usuário');
+			res.status(400).json({
+				status: false,
+				message: 'Usuario já cadastrado',
+				code: 400,
+			});
+		}
+	},
+	authMiddleware.authLogin
+);
 
 // login
 router.post('/login', async (req, res) => {
 	try {
-		const data = await authService.login(req.body);
+		const newRegister = false;
+		const data = await authService.login(req.body, newRegister);
 		res.status(200).json({
 			status: true,
 			message: 'Login com sucessos',
 			data,
+			code: 200,
 		});
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	} catch (e: any) {
@@ -44,8 +48,9 @@ router.post('/login', async (req, res) => {
 		logger.info('Erro de Login');
 		logger.info(e);
 		res.status(e.statusCode).json({
-			status: true,
+			status: false,
 			message: e.message,
+			code: e.statusCode,
 		});
 	}
 });
@@ -67,7 +72,15 @@ router.get('/users', authMiddleware.authGuard, async (req, res, next) => {
 	}
 });
 
-router.use(async (req: Request, res: Response, next) => {
+router.get(
+	'/check',
+	authMiddleware.authGuard,
+	async (_req: Request, res: Response) => {
+		res.json({ auth: true });
+	}
+);
+
+router.use(async (_req: Request, res: Response, next) => {
 	next(new createError.NotFound('Route not Found'));
 });
 
