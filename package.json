@@ -12,7 +12,7 @@
 		"server": "node ./dist/server.js",
 		"prod": "NODE_ENV=production npm-run-all prebuild build",
 		"dev": "NODE_ENV=development npm-run-all prebuild start server",
-		"killport": "fuser -n tcp -k 5900",
+		"killport": "fuser -n tcp -k 5500",
 		"lint": "eslint ./src",
 		"prettier": "prettier --write './**/*.ts'",
 		"test": "DATABASE_URL=postgresql://ecommerce:ecommerce@localhost:5435/ecommerce_test?schema=public jest --runInBand",
