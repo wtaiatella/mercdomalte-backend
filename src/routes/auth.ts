@@ -5,32 +5,9 @@ import logger from '../adapters/logger';
 
 import authService from '../services/authService';
 import authMiddleware from '../middlewares/authMiddleware';
+import emailMiddleware from '../middlewares/emailMiddleware';
 
 const router = express.Router();
-
-// register
-router.post(
-	'/register',
-	async (req, res, next) => {
-		logger.info(req.body);
-		try {
-			const user = await authService.register(req.body);
-			logger.info('Usuario cadastrado com sucesso');
-			logger.info(user);
-			next();
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		} catch (e: any) {
-			logger.info('Erro no cadastro de usuário');
-			res.status(400).json({
-				status: false,
-				message: 'Usuario já cadastrado',
-				code: 400,
-			});
-		}
-	},
-	authMiddleware.authLogin
-);
-
 // login
 router.post('/login', async (req, res) => {
 	try {
@@ -55,6 +32,66 @@ router.post('/login', async (req, res) => {
 	}
 });
 
+// register
+router.post(
+	'/register',
+	async (req, res, next) => {
+		logger.info(req.body);
+		try {
+			const user = await authService.register(req.body);
+			logger.info('Usuario cadastrado com sucesso');
+			logger.info(user);
+			next();
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		} catch (e: any) {
+			logger.info('Erro no cadastro de usuário');
+			res.status(400).json({
+				status: false,
+				message: 'Usuario já cadastrado',
+				code: 400,
+			});
+		}
+	},
+	authMiddleware.authLogin
+);
+
+// Update pasword and send e-mail
+router.put(
+	'/recoverypassword',
+	emailMiddleware.sendPassword,
+	async (req, res) => {
+		logger.info(req.body);
+		try {
+			const user = await authService.update(req.body);
+			logger.info('Senha atualizada com sucesso');
+			logger.info(user);
+			res.status(200).json({
+				status: true,
+				message: 'Senha atualizada com sucesso',
+				code: 200,
+				data: user,
+			});
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		} catch (e: any) {
+			logger.info('Erro na atualização de usuário');
+			res.status(400).json({
+				status: false,
+				message: 'Erro na atualização de usuário',
+				code: 400,
+			});
+		}
+	},
+	emailMiddleware.sendPassword
+);
+
+router.get(
+	'/check',
+	authMiddleware.authGuard,
+	async (_req: Request, res: Response) => {
+		res.json({ auth: true });
+	}
+);
+
 // all users
 router.get('/users', authMiddleware.authGuard, async (req, res, next) => {
 	logger.info('Consulta de usuários');
@@ -71,14 +108,6 @@ router.get('/users', authMiddleware.authGuard, async (req, res, next) => {
 		next(createError(e.statusCode, e.message));
 	}
 });
-
-router.get(
-	'/check',
-	authMiddleware.authGuard,
-	async (_req: Request, res: Response) => {
-		res.json({ auth: true });
-	}
-);
 
 router.use(async (_req: Request, res: Response, next) => {
 	next(new createError.NotFound('Route not Found'));

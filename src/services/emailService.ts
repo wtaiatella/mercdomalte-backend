@@ -3,14 +3,16 @@ import { google } from 'googleapis';
 import logger from '@src/adapters/logger';
 import 'dotenv/config';
 
-async function send(emailTo: string) {
+interface emailProps {
+	emailTo: string;
+	subject: string;
+	html: string;
+}
+
+async function send(emailData: emailProps) {
 	const OAuth2 = google.auth.OAuth2;
 
-	logger.info('Chaves de ambiente');
-	logger.info(process.env.GOOGLE_CLIENT_ID);
-	logger.info(process.env.GOOGLE_CLIENT_SECRET);
-	logger.info(process.env.GOOGLE_REFRESH_TOKEN);
-	logger.info(OAuth2);
+	logger.info('Service - send email');
 
 	const oauth2Client = new OAuth2(
 		process.env.GOOGLE_CLIENT_ID,
@@ -18,8 +20,8 @@ async function send(emailTo: string) {
 		'https://developers.google.com/oauthplayground' // Redirect URL
 	);
 
-	logger.info('Criação de oauth2Client');
-	logger.info(oauth2Client);
+	logger.info('Service - Criação de oauth2Client');
+	//logger.info(oauth2Client);
 
 	oauth2Client.setCredentials({
 		refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
@@ -27,8 +29,8 @@ async function send(emailTo: string) {
 
 	const accessToken = await oauth2Client.getAccessToken();
 
-	logger.info('Criação de Chave de acesso');
-	logger.info(accessToken);
+	logger.info('Service - Criação de Chave de acesso');
+	//logger.info(accessToken);
 
 	const transporter = NodeMailer.createTransport({
 		host: 'smtp.gmail.com',
@@ -45,11 +47,10 @@ async function send(emailTo: string) {
 	});
 
 	const mailOptions = {
-		from: 'wtaiatella@gmail.com',
-		//to: 'mercdomalte@gmail.com',
-		to: emailTo,
-		subject: 'Message1',
-		text: 'I hope this message gets through!',
+		from: 'Mercado do Malte <wtaiatella@gmail.com>',
+		to: emailData.emailTo,
+		subject: emailData.subject,
+		html: emailData.html,
 	};
 
 	transporter.sendMail(mailOptions, (error, response) => {
@@ -57,7 +58,7 @@ async function send(emailTo: string) {
 		transporter.close();
 	});
 
-	logger.info('Email enviado');
+	logger.info('Service - Email enviado');
 
 	return 'email sent';
 }

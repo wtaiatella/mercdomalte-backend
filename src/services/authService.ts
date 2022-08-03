@@ -11,23 +11,6 @@ interface dataProps {
 	password: string;
 }
 
-const register = async (data: dataProps) => {
-	data.password = bcrypt.hashSync(data.password, 8);
-
-	const user = await database.user.create({
-		data,
-	});
-	//user.accessToken = await jwt.signAccessToken(user);
-	logger.info('Retorno criação usuário');
-	logger.info({ user });
-
-	if (!user) {
-		throw new createError.BadRequest('Usuário ja registrado');
-	}
-
-	return user;
-};
-
 const login = async (data: dataProps, newRegister: boolean) => {
 	const { email, password } = data;
 	logger.info('Busca de usuario para login');
@@ -64,10 +47,46 @@ const login = async (data: dataProps, newRegister: boolean) => {
 	return { ...user, accessToken };
 };
 
+const register = async (data: dataProps) => {
+	data.password = bcrypt.hashSync(data.password, 8);
+
+	const user = await database.user.create({
+		data,
+	});
+	//user.accessToken = await jwt.signAccessToken(user);
+	logger.info('Retorno criação usuário');
+	logger.info({ user });
+
+	if (!user) {
+		throw new createError.BadRequest('Usuário ja registrado');
+	}
+
+	return user;
+};
+
+const update = async (data: dataProps) => {
+	data.password = bcrypt.hashSync(data.password, 8);
+
+	const user = await database.user.update({
+		where: {
+			email: data.email,
+		},
+		data,
+	});
+	logger.info('Retorno atualização usuário');
+	logger.info({ user });
+
+	if (!user) {
+		throw new createError.BadRequest('E-mail não encontrado');
+	}
+
+	return user;
+};
+
 const all = async () => {
 	const allUsers = await database.user.findMany();
 
 	return allUsers;
 };
 
-export default { register, login, all };
+export default { register, login, all, update };
