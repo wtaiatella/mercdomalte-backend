@@ -2,7 +2,7 @@ import jwt from '../utils/jwt';
 import createError from 'http-errors';
 import { NextFunction, Request, RequestHandler, Response } from 'express';
 import logger from '../adapters/logger';
-import authService from '@src/services/authService';
+import userService from '@src/services/userService';
 
 const authGuard: RequestHandler = async (
 	req: Request,
@@ -60,7 +60,7 @@ const authLogin: RequestHandler = async (req: Request, res: Response) => {
 	logger.info('Login após registro');
 	try {
 		const newRegister = true;
-		const data = await authService.login(req.body, newRegister);
+		const data = await userService.login(req.body, newRegister);
 		res.status(200).json({
 			status: true,
 			message: 'Login com sucessos',

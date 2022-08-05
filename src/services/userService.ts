@@ -7,8 +7,16 @@ import logger from './../adapters/logger';
 import jwt from '../utils/jwt';
 
 interface userProps {
+	name?: string;
+	email: string;
+	password?: string;
+	accessToken?: string;
+}
+
+interface updatePasswordProps {
 	email: string;
 	password: string;
+	passwordnew: string;
 }
 
 const login = async (data: userProps, newRegister: boolean) => {
@@ -33,14 +41,12 @@ const login = async (data: userProps, newRegister: boolean) => {
 
 	const checkPassword = newRegister
 		? true
-		: bcrypt.compareSync(password, `${user.password}`);
+		: bcrypt.compareSync(`${password}`, `${user.password}`);
 
 	if (!checkPassword) {
 		logger.info('Senha incorreta');
 		throw new createError.Unauthorized('Senha incorreta');
 	}
-
-	//delete user.password;
 
 	const accessToken = await jwt.signAccessToken(user);
 
@@ -48,7 +54,7 @@ const login = async (data: userProps, newRegister: boolean) => {
 };
 
 const register = async (data: userProps) => {
-	data.password = bcrypt.hashSync(data.password, 8);
+	data.password = bcrypt.hashSync(`${data.password}`, 8);
 
 	const user = await database.user.create({
 		data,
@@ -64,9 +70,35 @@ const register = async (data: userProps) => {
 	return user;
 };
 
-const update = async (data: userProps) => {
-	data.password = bcrypt.hashSync(data.password, 8);
+const updatePassword = async (dataUpdate: updatePasswordProps) => {
+	const data: userProps = {
+		email: dataUpdate.email,
+		password: dataUpdate.passwordnew,
+	};
+	data.password = bcrypt.hashSync(`${data.password}`, 8);
 
+	const user = await database.user.update({
+		where: {
+			email: data.email,
+		},
+		data,
+	});
+	logger.info('Retorno atualização usuário');
+	logger.info({ user });
+
+	if (!user) {
+		throw new createError.BadRequest('E-mail não encontrado');
+	}
+
+	return user;
+};
+
+const updateData = async (userData: userProps) => {
+	const { email, name } = userData;
+	const data: userProps = {
+		email,
+		name,
+	};
 	const user = await database.user.update({
 		where: {
 			email: data.email,
@@ -89,4 +121,4 @@ const all = async () => {
 	return allUsers;
 };
 
-export default { register, login, all, update };
+export default { register, login, all, updatePassword, updateData };

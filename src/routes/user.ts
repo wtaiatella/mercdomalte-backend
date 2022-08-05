@@ -9,6 +9,13 @@ import emailMiddleware from '../middlewares/emailMiddleware';
 
 const router = express.Router();
 
+interface userProps {
+	name: string;
+	email: string;
+	password?: string;
+	accessToken?: string;
+}
+
 // login
 router.post('/login', async (req, res) => {
 	try {
@@ -56,14 +63,14 @@ router.post(
 	authMiddleware.authLogin
 );
 
-// Update pasword and send e-mail
+// Renew password and send e-mail
 router.put(
 	'/recoverypassword',
 	emailMiddleware.sendPassword,
 	async (req, res) => {
 		logger.info(req.body);
 		try {
-			const user = await userService.update(req.body);
+			const user = await userService.updatePassword(req.body);
 			logger.info('Senha atualizada com sucesso');
 			logger.info(user);
 			res.status(200).json({
@@ -86,6 +93,73 @@ router.put(
 );
 
 // Update data
+router.put('/update', async (req, res) => {
+	logger.info(req.body);
+	try {
+		const user = await userService.updateData(req.body);
+		logger.info('User atualizado com sucesso');
+		logger.info(user);
+		res.status(200).json({
+			status: true,
+			message: 'User atualizado com sucesso',
+			code: 200,
+			data: user,
+		});
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	} catch (e: any) {
+		logger.info('Erro na atualização de usuário');
+		res.status(400).json({
+			status: false,
+			message: 'Erro na atualização de usuário',
+			code: 400,
+		});
+	}
+});
+
+// Update passwpord
+router.put(
+	'/updatepassword',
+
+	async (req, res) => {
+		logger.info(req.body);
+		try {
+			const newRegister = false;
+			const { name, email, password, passwordnew } = req.body;
+			const checkPassword: userProps = {
+				name,
+				email,
+				password,
+			};
+
+			await userService.login(checkPassword, newRegister);
+			logger.info('Senha atual conferida');
+			const updatePassword = {
+				email,
+				password,
+				passwordnew,
+			};
+
+			const user = await userService.updatePassword(updatePassword);
+			logger.info('Senha atualizada com sucesso');
+			logger.info(user);
+			res.status(200).json({
+				status: true,
+				message: 'Senha atualizada com sucesso',
+				code: 200,
+				data: user,
+			});
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		} catch (e: any) {
+			logger.info('Erro na atualização de usuário');
+			res.status(400).json({
+				status: false,
+				message: 'Erro na atualização de usuário',
+				code: 400,
+			});
+		}
+	},
+	emailMiddleware.sendPassword
+);
 
 // all users
 router.get('/users', authMiddleware.authGuard, async (req, res, next) => {
