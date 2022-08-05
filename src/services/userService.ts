@@ -1,43 +1,124 @@
-import { database } from "./../adapters/database";
-import logger from "./../adapters/logger";
+import bcrypt from 'bcryptjs';
+import createError from 'http-errors';
 
-const findOne = async (productId: string) => {
-  logger.info({ productId });
+import { database } from './../adapters/database';
+import logger from './../adapters/logger';
 
-  const product = await database.product.findUnique({
-    where: {
-      slug: productId,
-    },
-  });
+import jwt from '../utils/jwt';
 
-  return product;
-};
-
-export interface ProductProps {
-  name: string;
-  categoryId: string;
-  price?: number;
-  priceWithDiscount?: number;
-  description?: string;
-  headline?: string;
+interface userProps {
+	name?: string;
+	email: string;
+	password?: string;
+	accessToken?: string;
 }
 
-const create = async (props: ProductProps) => {
-  const { name, categoryId, price, priceWithDiscount, description, headline } =
-    props;
+interface updatePasswordProps {
+	email: string;
+	password: string;
+	passwordnew: string;
+}
 
-  const slug = name.replace(" ", "-").toLowerCase();
+const login = async (data: userProps, newRegister: boolean) => {
+	const { email, password } = data;
+	logger.info('Busca de usuario para login');
+	logger.info(`email: ${data.email}`);
 
-  const data = {
-    name,
-    slug,
-    categoryId,
-    price,
-    priceWithDiscount,
-    description,
-    headline,
-  };
+	const user = await database.user.findUnique({
+		where: {
+			email,
+		},
+	});
 
-  return database.product.create({ data });
+	logger.info('Retorno do usuario');
+	logger.info(user);
+
+	if (!user) {
+		logger.info('Usuário não registrado');
+
+		throw new createError.NotFound('Usuário não registrado');
+	}
+
+	const checkPassword = newRegister
+		? true
+		: bcrypt.compareSync(`${password}`, `${user.password}`);
+
+	if (!checkPassword) {
+		logger.info('Senha incorreta');
+		throw new createError.Unauthorized('Senha incorreta');
+	}
+
+	const accessToken = await jwt.signAccessToken(user);
+
+	return { ...user, accessToken };
 };
-export default { findOne, create };
+
+const register = async (data: userProps) => {
+	data.password = bcrypt.hashSync(`${data.password}`, 8);
+
+	const user = await database.user.create({
+		data,
+	});
+	//user.accessToken = await jwt.signAccessToken(user);
+	logger.info('Retorno criação usuário');
+	logger.info({ user });
+
+	if (!user) {
+		throw new createError.BadRequest('Usuário ja registrado');
+	}
+
+	return user;
+};
+
+const updatePassword = async (dataUpdate: updatePasswordProps) => {
+	const data: userProps = {
+		email: dataUpdate.email,
+		password: dataUpdate.passwordnew,
+	};
+	data.password = bcrypt.hashSync(`${data.password}`, 8);
+
+	const user = await database.user.update({
+		where: {
+			email: data.email,
+		},
+		data,
+	});
+	logger.info('Retorno atualização usuário');
+	logger.info({ user });
+
+	if (!user) {
+		throw new createError.BadRequest('E-mail não encontrado');
+	}
+
+	return user;
+};
+
+const updateData = async (userData: userProps) => {
+	const { email, name } = userData;
+	const data: userProps = {
+		email,
+		name,
+	};
+	const user = await database.user.update({
+		where: {
+			email: data.email,
+		},
+		data,
+	});
+	logger.info('Retorno atualização usuário');
+	logger.info({ user });
+
+	if (!user) {
+		throw new createError.BadRequest('E-mail não encontrado');
+	}
+
+	return user;
+};
+
+const all = async () => {
+	const allUsers = await database.user.findMany();
+
+	return allUsers;
+};
+
+export default { register, login, all, updatePassword, updateData };

@@ -4,9 +4,11 @@ import cors from 'cors';
 
 //require Routes
 import authRouter from './routes/auth';
+import userRouter from './routes/user';
 import fileRouter from './routes/file';
 import awsRouter from './routes/aws';
 import emailRouter from './routes/email';
+
 import ecommerceRouter from './routes/ecommerce';
 const app = express();
 
@@ -19,6 +21,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 app.use('/auth', authRouter);
+app.use('/user', userRouter);
 app.use('/file', fileRouter);
 app.use('/aws', awsRouter);
 app.use('/email', emailRouter);
