@@ -1,3 +1,4 @@
+import fileService from '@src/services/fileService';
 import express from 'express';
 import { Request, Response } from 'express';
 import logger from '../adapters/logger';
@@ -28,6 +29,25 @@ router.post('/downloadurl', async (req: Request, res: Response) => {
 
 	res.json(url);
 	//res.json(fileName);
+});
+
+router.post('/delete', async (req: Request, res: Response) => {
+	const { fileName } = req.body;
+
+	logger.debug(req.body);
+	logger.debug(fileName);
+
+	try {
+		const awsDelete = await awsService.s3delete(fileName);
+		logger.info(`\nSuccessfully deleted file in AWS.\n`);
+		logger.info(awsDelete);
+		const fileDeleted = await fileService.fileDelete(fileName);
+		logger.info(`\nSuccessfully deleted file in database.\n`);
+		res.json(fileDeleted);
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	} catch (e: any) {
+		res.json((e.message = 'Error'));
+	}
 });
 
 export default router;
