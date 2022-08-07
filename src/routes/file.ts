@@ -1,68 +1,80 @@
-import express from "express";
-import { Request, Response } from "express";
+import express from 'express';
+import { Request, Response } from 'express';
 
-import logger from "../adapters/logger";
+import logger from '../adapters/logger';
 
-import mediaService from "../services/mediaService";
+import fileService from '../services/fileService';
 
 const router = express.Router();
 
-router.get("/", async (req: Request, res: Response) => {
-  logger.debug(`aqui estão as Medias:`);
-  const medias = await mediaService.findMedias();
-  logger.debug(medias);
-  res.json(medias);
-});
-
-interface mediaProps {
-  title: string;
-  name: string;
-  slug: string;
-  icon: string;
-  type: string;
-  size: number;
-  categoryId: string;
+interface fileProps {
+	title: string;
+	name: string;
+	slug: string;
+	icon: string;
+	type: string;
+	size: number;
+	categoryId: string;
+	email: string;
 }
 
-router.post("/", async (req: Request, res: Response) => {
-  console.log(req.body);
-  const { title, name, slug, icon, type, size, categoryId } = req.body;
-  const media: mediaProps = {
-    title,
-    name,
-    slug,
-    icon,
-    type,
-    size,
-    categoryId,
-  };
-
-  try {
-    const mediaCreated = await mediaService.create(media);
-    res.json({ mediaCreated });
-  } catch (err) {
-    res.status(400);
-    //res.json({ err: 'Invalid name' });
-  }
+router.get('/', async (req: Request, res: Response) => {
+	logger.debug(`aqui estão os Files:`);
+	const files = await fileService.findFiles();
+	logger.debug(files);
+	res.json(files);
 });
 
-router.get("/categories", async (req: Request, res: Response) => {
-  const categories = await mediaService.findCategories();
-  console.log(`aqui estão as Medias:`);
-  console.log(categories);
-  res.json(categories);
+router.get('/user/:id', async (req: Request, res: Response) => {
+	const userId = req.params.id;
+
+	const files = await fileService.findByUser(userId);
+	logger.debug(`aqui estão os Files:`);
+	logger.debug(files);
+	res.json(files);
+});
+
+router.post('/', async (req: Request, res: Response) => {
+	console.log(req.body);
+	const { title, name, slug, icon, type, size, categoryId, email } = req.body;
+
+	const file: fileProps = {
+		title,
+		name,
+		slug,
+		icon,
+		type,
+		size,
+		categoryId,
+		email,
+	};
+
+	try {
+		const fileCreated = await fileService.create(file);
+		res.json({ fileCreated });
+	} catch (err) {
+		res.status(400);
+		//res.json({ err: 'Invalid name' });
+	}
+});
+
+router.get('/categories', async (req: Request, res: Response) => {
+	const categories = await fileService.findCategories();
+	console.log(`aqui estão os Files:`);
+	console.log(categories);
+	res.json(categories);
 });
 
 //Verify if slug exist
-//medias/slug/${fileSlug}
-router.get("/slug/:slug", async (req: Request, res: Response) => {
-  const fileSlug = req.params.slug;
-  console.log(fileSlug);
+//files/slug/${fileSlug}
+router.get('/slug/:slug', async (req: Request, res: Response) => {
+	const fileSlug = req.params.slug;
+	console.log(fileSlug);
 
-  const medias = await mediaService.findSlug(fileSlug);
-  console.log(`aqui estão as Medias:`);
-  console.log(medias);
-  res.json(medias);
+	const files = await fileService.findSlug(fileSlug);
+	console.log(`aqui estão os Files:`);
+	console.log(files);
+	res.json(files);
 });
 
 export default router;
