@@ -45,7 +45,16 @@ module.exports = {
 	},
 	externals: [nodeExternals()], // in order to ignore all modules in node_modules folder
 	plugins: [
-		new ForkTsCheckerWebpackPlugin(),
+		new ForkTsCheckerWebpackPlugin({
+			typescript: {
+				diagnosticOptions: {
+					semantic: true,
+					syntactic: true,
+				},
+				mode: 'write-references',
+				memoryLimit: 4096,
+			},
+		}),
 		new ForkTsCheckerNotifierWebpackPlugin({
 			title: 'TypeScript',
 			excludeWarnings: false,
