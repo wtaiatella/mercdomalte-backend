@@ -12,8 +12,7 @@ const router = express.Router();
 interface userProps {
 	name: string;
 	email: string;
-	password?: string;
-	accessToken?: string;
+	password: string;
 }
 
 // login
@@ -134,6 +133,7 @@ router.put(
 			await userService.login(checkPassword, newRegister);
 			logger.info('Senha atual conferida');
 			const updatePassword = {
+				name,
 				email,
 				password,
 				passwordnew,

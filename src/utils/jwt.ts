@@ -1,10 +1,18 @@
 import jwt from 'jsonwebtoken';
 import createError from 'http-errors';
-import process from 'dotenv/config';
+
+import * as dotenv from 'dotenv';
+dotenv.config({ path: __dirname + '/.env' });
 
 const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
 
-const signAccessToken = (payload) => {
+interface userProps {
+	name: string;
+	email: string;
+	password: string;
+}
+
+const signAccessToken = (payload: userProps) => {
 	return new Promise((resolve, reject) => {
 		jwt.sign({ payload }, `${accessTokenSecret}`, {}, (err, token) => {
 			if (err) {
@@ -15,7 +23,7 @@ const signAccessToken = (payload) => {
 	});
 };
 
-const verifyAccessToken = (token) => {
+const verifyAccessToken = (token: string) => {
 	return new Promise((resolve, reject) => {
 		jwt.verify(token, `${accessTokenSecret}`, (err, payload) => {
 			if (err) {

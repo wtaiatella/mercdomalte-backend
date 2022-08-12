@@ -24,7 +24,7 @@ const authGuard: RequestHandler = async (
 	} else {
 		logger.info(req.headers.authorization);
 
-		const token = req.headers.authorization.split(' ')[1];
+		const token: string = req.headers.authorization.split(' ')[1];
 		if (!token) {
 			logger.info('Token não encontrado');
 			const errAutho = new createError.Unauthorized(

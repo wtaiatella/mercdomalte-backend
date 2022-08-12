@@ -7,13 +7,13 @@ import logger from './../adapters/logger';
 import jwt from '../utils/jwt';
 
 interface userProps {
-	name?: string;
+	name: string;
 	email: string;
-	password?: string;
-	accessToken?: string;
+	password: string;
 }
 
 interface updatePasswordProps {
+	name: string;
 	email: string;
 	password: string;
 	passwordnew: string;
@@ -24,16 +24,31 @@ const login = async (data: userProps, newRegister: boolean) => {
 	logger.info('Busca de usuario para login');
 	logger.info(`email: ${data.email}`);
 
-	const user = await database.user.findUnique({
+	const userFound = await database.user.findUnique({
 		where: {
 			email,
 		},
 	});
 
+	let user: userProps;
+	if (userFound) {
+		user = {
+			name: `${userFound.name}`,
+			email: `${userFound.email}`,
+			password: `${userFound.password}`,
+		};
+	} else {
+		user = {
+			name: '',
+			email: '',
+			password: '',
+		};
+	}
+
 	logger.info('Retorno do usuario');
 	logger.info(user);
 
-	if (!user) {
+	if (!user.email) {
 		logger.info('Usuário não registrado');
 
 		throw new createError.NotFound('Usuário não registrado');
@@ -59,7 +74,7 @@ const register = async (data: userProps) => {
 	const user = await database.user.create({
 		data,
 	});
-	//user.accessToken = await jwt.signAccessToken(user);
+
 	logger.info('Retorno criação usuário');
 	logger.info({ user });
 
@@ -72,6 +87,7 @@ const register = async (data: userProps) => {
 
 const updatePassword = async (dataUpdate: updatePasswordProps) => {
 	const data: userProps = {
+		name: dataUpdate.name,
 		email: dataUpdate.email,
 		password: dataUpdate.passwordnew,
 	};
@@ -94,10 +110,11 @@ const updatePassword = async (dataUpdate: updatePasswordProps) => {
 };
 
 const updateData = async (userData: userProps) => {
-	const { email, name } = userData;
+	const { email, name, password } = userData;
 	const data: userProps = {
 		email,
 		name,
+		password,
 	};
 	const user = await database.user.update({
 		where: {
