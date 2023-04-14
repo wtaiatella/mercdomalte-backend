@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import createError from 'http-errors';
+import logger from '../adapters/logger';
 
 import * as dotenv from 'dotenv';
 dotenv.config({ path: __dirname + '/.env' });
@@ -13,6 +14,7 @@ interface userProps {
 }
 
 const signAccessToken = (payload: userProps) => {
+	logger.info(accessTokenSecret);
 	return new Promise((resolve, reject) => {
 		jwt.sign({ payload }, `${accessTokenSecret}`, {}, (err, token) => {
 			if (err) {

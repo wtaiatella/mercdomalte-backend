@@ -18,11 +18,11 @@
     "colId": "history",
     "containerId": "",
     "name": "http://localhost:5900/",
-    "url": "http://localhost:5500/auth/users",
+    "url": "http://localhost:5500/user/users",
     "method": "GET",
     "sortNum": 0,
     "created": "2022-07-29T17:59:32.352Z",
-    "modified": "2022-08-01T14:15:02.227Z",
+    "modified": "2023-04-10T13:59:56.897Z",
     "headers": [
       {
         "name": "Authorization",
